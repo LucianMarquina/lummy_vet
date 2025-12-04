@@ -5,9 +5,7 @@ las citas médicas y el historial clínico
 
 ## Tecnologías
 
-*   ![Odoo](https://img.shields.io/badge/Odoo-714B67?style=for-the-badge)
+*   ![Odoo](https://img.shields.io/badge/Odoo-714B67?style=for-the-badge&logo=odoo&logoColor=white)
 *   ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
              
 Software Developer: **Alessandro Marquina**
-
-
