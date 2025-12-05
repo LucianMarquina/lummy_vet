@@ -5,8 +5,9 @@ class VetAppointment(models.Model):
     _description = 'Todo el evento de la cita'
 
     code = fields.Char(string='Referencia')
-    date_time = fields.Datetime(string='Fecha y hora', default='Ahora')
-    patient_id = feilds.Many2one('vet.patient', string='Paciente', required=True)
+    date_time = fields.Datetime(string='Fecha y hora', default=fields.Datetime.now ,required=True)
+    partner_id = fields.Many2one('res.partner', string="Dueño", required=True)
+    pet_ids = fields.Many2one('vet.patient', string='Paciente', required=True)
     doctor_id = fields.Many2one('res.partner', string='Doctor', domain=[('is_vet_doctor', '=', True)])
     state = fields.Selection(
         [
