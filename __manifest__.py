@@ -24,5 +24,5 @@
     
     'auto_install': True,
     'application': True,
-    'web_icon': ''
+    'web_icon': 'lummy_vet/static/description/icon.png',
 }
