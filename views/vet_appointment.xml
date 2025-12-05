@@ -1,16 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-
     <record id="vet_appointment_view_tree" model="ir.ui.view">
         <field name="name">vet.appointment.view.tree</field>
         <field name="model">vet.appointment</field>
         <field name="arch" type="xml">
-            <tree string="Lista de Citas">
+            <tree string="Lista de Citas">            
                 <field name="code" string="Codigo de referencia"/>
+                <field name="partner_id" string="Dueño de mascota"/>
                 <field name="date_time" string="Fecha y hora"/>
-                <field name="partner_id" string="Dueño"/>
+                <field name="pet_ids" string="Nombre de la mascota"/>     
+                <field name="state" string="Estado de la cita" widget="badge" decoration-muted="state == 'draft'" decoration-info="state == 'confirmed'" decoration-success="state == 'done'" decoration-danger="state == 'cancel'"/>           
             </tree>
         </field>
     </record>    
 
+    <record id="vet_appointment_view_form" model="ir.ui.view">
+        <field name="name">vet.appointment.view.form</field>
+        <field name="model">vet.appointment</field>
+        <field name="arch" type="xml">
+            <form string="Registro de cita">
+                <header>                    
+                    <field name="state" widget="statusbar"/>
+                </header>               
+                <sheet>
+                    <group name="group_1" string="Datos generales">
+                        <field name="date_time" string="Fecha de registro"/>
+                        <field name="partner_id" string="Nombre dueño de mascota"/>
+                        <field name="pet_ids" string="Nombre de mascota"/>
+                        <field name="description" string="Observaciones"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
 </odoo>
