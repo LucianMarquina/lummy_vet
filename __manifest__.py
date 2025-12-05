@@ -15,7 +15,8 @@
     'data': [
         'security/ir.model.access.csv',
         'views/menus.xml',
-        'views/vet_appointment.xml'
+        'views/vet_appointment.xml',
+        'views/inherit_res_partner.xml'
     ],
 
     'demo': [

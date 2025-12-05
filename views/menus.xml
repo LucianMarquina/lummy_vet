@@ -5,14 +5,25 @@
         <field name="res_model">vet.appointment</field>
     </record>
 
+    <record id="action_view_res_partner" model="ir.actions.act_window">
+        <field name="name">Clientes</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('res_partner_view_tree')}),
+            (0, 0, {'view_mode': 'kanban', 'view_id': ref('res_partner_view_kanban')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('res_partner_view_form')})]"/>
+    </record>
+
     <menuitem
         id="lummy_vet_menu_main"
         name="Lummy Vet"
         action="action_view_vet_appointment"/>   
 
     <menuitem
-        id="vet_appointment_menu"
-        name="Citas"
+        id="menu_res_partner"
+        name="Clientes"
         parent="lummy_vet_menu_main"
-        action="action_view_vet_appointment"/>
+        action="action_view_res_partner"/>
+
 </odoo>
