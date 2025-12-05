@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="vet_appointment_view_tree" model="ir.ui.view">
+        <field name="name">vet.appointment.view.tree</field>
+        <field name="model">vet.appointment</field>
+        <field name="arch" type="xml">
+            <tree string="Lista de Citas">
+                <field name="code" string="Codigo de referencia"/>
+                <field name="date_time" string="Fecha y hora"/>
+                <field name="partner_id" string="Dueño"/>
+            </tree>
+        </field>
+    </record>    
+
+</odoo>

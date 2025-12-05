@@ -8,11 +8,13 @@
     'category': 'Inventario & Gestión',
 
     'depends': [
-
+        'base',
+        'contacts'
     ],
 
     'data': [
-
+        'security/ir.model.access.csv',
+        'views/menus.xml'       
     ],
 
     'demo': [
