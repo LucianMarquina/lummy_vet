@@ -14,7 +14,8 @@
 
     'data': [
         'security/ir.model.access.csv',
-        'views/menus.xml'       
+        'views/menus.xml',
+        'views/vet_appointment.xml'
     ],
 
     'demo': [
