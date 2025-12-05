@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<odoo>
-    
-    
+<odoo>    
+    <record id="action_view_vet_appointment" model="ir.actions.act_window">
+        <field name="name">Registrar cita</field>
+        <field name="res_model">vet.appointment</field>
+    </record>
 
+    <menuitem
+        id="lummy_vet_menu_main"
+        name="Lummy Vet"
+        action="action_view_vet_appointment"/>   
+
+    <menuitem
+        id="vet_appointment_menu"
+        name="Citas"
+        parent="lummy_vet_menu_main"
+        action="action_view_vet_appointment"/>
 </odoo>
