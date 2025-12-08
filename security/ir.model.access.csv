@@ -3,3 +3,4 @@ access_vet_patient,vet.patient.access,model_vet_patient,base.group_user,1,1,1,1
 access_vet_appointment,vet.appointment.access,model_vet_appointment,base.group_user,1,1,1,1
 access_vet_medication,vet.medication.access,model_vet_medication,base.group_user,1,1,1,1
 access_vet_treatment,vet.treatment.access,model_vet_treatment,base.group_user,1,1,1,1
+access_vet_payment,vet.payment.access,model_vet_payment,base.group_user,1,1,1,1

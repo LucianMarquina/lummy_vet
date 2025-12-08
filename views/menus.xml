@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<odoo>    
+<odoo>
     <record id="action_view_vet_appointment" model="ir.actions.act_window">
         <field name="name">Registrar cita</field>
         <field name="res_model">vet.appointment</field>
@@ -10,21 +10,30 @@
         <field name="name">Clientes</field>
         <field name="res_model">res.partner</field>
         <field name="view_mode">kanban,tree,form</field>
-        <field name="view_ids" eval="[(5, 0, 0),
+        <field name="view_ids"
+            eval="[(5, 0, 0),
             (0, 0, {'view_mode': 'tree', 'view_id': ref('res_partner_view_tree')}),
             (0, 0, {'view_mode': 'kanban', 'view_id': ref('res_partner_view_kanban')}),
-            (0, 0, {'view_mode': 'form', 'view_id': ref('res_partner_view_form')})]"/>
+            (0, 0, {'view_mode': 'form', 'view_id': ref('res_partner_view_form')})]" />
     </record>
 
     <menuitem
-        id="lummy_vet_menu_main"
+        id="lummy_vet_menu_root"
         name="Lummy Vet"
-        action="action_view_vet_appointment"/>   
+        action="action_view_vet_appointment"
+        web_icon="lummy_vet/static/description/icon.png" />
 
     <menuitem
         id="menu_res_partner"
         name="Clientes"
-        parent="lummy_vet_menu_main"
-        action="action_view_res_partner"/>
+        parent="lummy_vet_menu_root"
+        action="action_view_res_partner" />
+
+    <menuitem
+        id="menu_vet_payment"
+        name="Pagos"
+        parent="lummy_vet_menu_root"
+        action="action_vet_payment"
+        sequence="30" />
 
 </odoo>

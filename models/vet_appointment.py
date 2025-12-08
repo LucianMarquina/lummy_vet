@@ -18,3 +18,5 @@ class VetAppointment(models.Model):
         ], default='draft'
     )
     description = fields.Text(string='Observaciones iniciales')
+
+    payment_ids = fields.One2many('vet.payment', 'appointment_id', string='Pagos realizados')
