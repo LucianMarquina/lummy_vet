@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <odoo>
     <record id="action_view_vet_appointment" model="ir.actions.act_window">
         <field name="name">Registrar cita</field>
@@ -15,6 +14,15 @@
             (0, 0, {'view_mode': 'tree', 'view_id': ref('res_partner_view_tree')}),
             (0, 0, {'view_mode': 'kanban', 'view_id': ref('res_partner_view_kanban')}),
             (0, 0, {'view_mode': 'form', 'view_id': ref('res_partner_view_form')})]" />
+    </record>
+
+    <record id="action_account_payments_vet" model="ir.actions.act_window">
+        <field name="name">Pagos</field>
+        <field name="res_model">account.payment</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('partner_type', '=', 'customer')]</field>
+        <field name="context">{'default_partner_type': 'customer', 'default_payment_type':
+            'inbound'}</field>
     </record>
 
     <menuitem
@@ -33,7 +41,6 @@
         id="menu_vet_payment"
         name="Pagos"
         parent="lummy_vet_menu_root"
-        action="action_vet_payment"
+        action="action_account_payments_vet"
         sequence="30" />
-
 </odoo>

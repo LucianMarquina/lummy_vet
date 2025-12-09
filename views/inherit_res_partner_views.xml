@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+
     <record id="res_partner_view_tree" model="ir.ui.view">
         <field name="name">res.partner.view.tree</field>
         <field name="model">res.partner</field>
         <field name="mode">primary</field>
         <field name="inherit_id" ref="base.view_partner_tree" />
         <field name="arch" type="xml">
-            <xpath expr="//tree" position="inside">
-
+            <xpath expr="//field[@name='email']" position="after">
+                <field name="is_vet_doctor" optional="show" />
             </xpath>
         </field>
     </record>
@@ -18,8 +19,13 @@
         <field name="mode">primary</field>
         <field name="inherit_id" ref="base.res_partner_kanban_view" />
         <field name="arch" type="xml">
-            <xpath expr="//kanban" position="inside">
-
+            <xpath expr="//field[@name='id']" position="after">
+                <field name="is_vet_doctor" />
+            </xpath>
+            <xpath expr="//div[hasclass('oe_kanban_details')]" position="inside">
+                <div t-if="record.is_vet_doctor.raw_value" class="mt-1">
+                    <span class="badge text-bg-info">Veterinario</span>
+                </div>
             </xpath>
         </field>
     </record>
@@ -31,7 +37,8 @@
         <field name="inherit_id" ref="base.view_partner_form" />
         <field name="arch" type="xml">
             <xpath expr="//field[@name='vat']" position="after">
-                <field name="pet_ids" string="Mascotas" />
+                <field name="is_vet_doctor" />
+                <field name="pet_ids" string="Mascotas" context="{'default_partner_id': active_id}" />
             </xpath>
         </field>
     </record>

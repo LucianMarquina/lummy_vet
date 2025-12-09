@@ -44,131 +44,157 @@ __init__.py
 __manifest__.py
 .gitignore
 models/__init__.py
+models/inherit_account_payment.py
 models/inherit_res_partner.py
 models/vet_appointment.py
 models/vet_medication.py
 models/vet_patient.py
-models/vet_payment.py
 models/vet_treatment.py
 README.md
 security/ir.model.access.csv
 static/description/icon.png
-views/inherit_res_partner.xml
+views/inherit_res_partner_views.xml
 views/menus.xml
-views/vet_appointment.xml
-views/vet_payment_views.xml
+views/vet_appointment_views.xml
 wizard/.gitkeep
 </directory_structure>
 
 <files>
 This section contains the contents of the repository's files.
 
-<file path="models/vet_payment.py">
+<file path="models/inherit_account_payment.py">
 from odoo import models, fields
 
-class VetPayment(models.Model):
-    _name = 'vet.payment'
-    _description = 'Registro de Pagos'
-    _order = 'date desc'
+class AccountPayment(models.Model):
+    _inherit = 'account.payment'
 
-    name = fields.Char(string='Descripción', required=True, default='Pago de cita')
-    date = fields.Date(string='Fecha', default=fields.Date.today, required=True)
-    amount = fields.Float(string='Monto', required=True)
-
-    # Se listan los métodos de pagos
-    payment_method = fields.Selection([
-        ('cash', 'Efectivo'),
-        ('yape', 'Yape'),
-        ('plin', 'Plin'),
-        ('card', 'Tarjeta de crédito'),
-        ('transfer', 'Transferencia')
-    ], string='Método de pago', required=True)
-
-    # Se crean estado simples para saber si se cobró o no
-    state = fields.Selection([
-        ('draft', 'Borrador'),
-        ('posted', 'Confirmado')
-    ], string='Estado', default='draft')
-
-    # Relaciones
-    appointment_id = fields.Many2one('vet.appointment', string='Cita asociada')
-
-    # Se busca el cliente de la cita automáticamente
-    partner_id = fields.Many2one(
-        related='appointment_id.partner_id',
-        string='Cliente',
-        store=True,
+    # Se crea la relación inversa hacia la cita
+    vet_appointment_id = fields.Many2one(
+        'vet.appointment',
+        string='Cita Veterinaria',
         readonly=True
     )
 
-    # Botón para confirmar el pago
-    def action_confirm(self):
-        for record in self:
-            record.state = 'posted'
+    vet_payment_method_type = fields.Selection([
+        ('cash', 'Efectivo'),
+        ('yape', 'Yape'),
+        ('plin', 'Plin'),
+        ('credit_card', 'Tarjeta de Credito'),
+        ('debit_card', 'Tarjeta de Debito'),
+        ('transfer', 'Transferencia'),
+    ], string='Tipo de Pago')
 </file>
 
-<file path="views/vet_payment_views.xml">
-<?xml version="1.0" encoding="UTF-8"?>
+<file path="views/inherit_res_partner_views.xml">
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- Vista tipo lista (tree)-->
-    <record id="view_vet_payment_tree" model="ir.ui.view">
-        <field name="name">vet.payment.tree</field>
-        <field name="model">vet.payment</field>
+    <record id="res_partner_view_tree" model="ir.ui.view">
+        <field name="name">res.partner.view.tree</field>
+        <field name="model">res.partner</field>
+        <field name="mode">primary</field>
+        <field name="inherit_id" ref="base.view_partner_tree" />
         <field name="arch" type="xml">
-            <tree string="Pagos" decoration-info="state == 'draft'"
-                decoration-success="state == 'posted'">
-                <field name="date" />
-                <field name="name" />
-                <field name="partner_id" />
-                <field name="payment_method" />
-                <field name="amount" sum="Total" />
-                <field name="state" widget="badge"
-                    decoration-info="state == 'draft'"
-                    decoration-success="state == 'posted'" />
+            <xpath expr="//field[@name='email']" position="after">
+                <field name="is_vet_doctor" optional="show" />
+            </xpath>
+        </field>
+    </record>
+
+    <record id="res_partner_view_kanban" model="ir.ui.view">
+        <field name="name">res.partner.view.kanban</field>
+        <field name="model">res.partner</field>
+        <field name="mode">primary</field>
+        <field name="inherit_id" ref="base.res_partner_kanban_view" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='id']" position="after">
+                <field name="is_vet_doctor" />
+            </xpath>
+            <xpath expr="//div[hasclass('oe_kanban_details')]" position="inside">
+                <div t-if="record.is_vet_doctor.raw_value" class="mt-1">
+                    <span class="badge text-bg-info">Veterinario</span>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="res_partner_view_form" model="ir.ui.view">
+        <field name="name">res.partner.view.form</field>
+        <field name="model">res.partner</field>
+        <field name="mode">primary</field>
+        <field name="inherit_id" ref="base.view_partner_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='vat']" position="after">
+                <field name="is_vet_doctor" />
+                <field name="pet_ids" string="Mascotas" context="{'default_partner_id': active_id}" />
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
+</file>
+
+<file path="views/vet_appointment_views.xml">
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="vet_appointment_view_tree" model="ir.ui.view">
+        <field name="name">vet.appointment.view.tree</field>
+        <field name="model">vet.appointment</field>
+        <field name="arch" type="xml">
+            <tree string="Lista de Citas">
+                <field name="code" string="Codigo de referencia" />
+                <field name="partner_id" string="Dueño de mascota" />
+                <field name="date_time" string="Fecha y hora" />
+                <field name="pet_ids" string="Nombre de la mascota" />
+                <field name="state" string="Estado de la cita" widget="badge"
+                    decoration-muted="state == 'draft'"
+                    decoration-info="state == 'confirmed'"
+                    decoration-success="state == 'done'"
+                    decoration-danger="state == 'cancel'" />
             </tree>
         </field>
     </record>
 
-    <!-- Vista tipo formulario (form)-->
-    <record id="view_vet_payment_form" model="ir.ui.view">
-        <field name="name">vet.payment.form</field>
-        <field name="model">vet.payment</field>
+    <record id="vet_appointment_view_form" model="ir.ui.view">
+        <field name="name">vet.appointment.view.form</field>
+        <field name="model">vet.appointment</field>
         <field name="arch" type="xml">
-            <form string="Pago">
+            <form string="Registro de cita">
                 <header>
-                    <!-- Botón para confirmar el pago -->
-                    <button name="action_confirm" string="Confirmar Pago" type="object"
-                        class="oe_highlight" invisible="state == 'posted'" />
                     <field name="state" widget="statusbar" />
                 </header>
                 <sheet>
-                    <group>
-                        <group>
-                            <field name="name" />
-                            <field name="appointment_id" />
-                            <field name="partner_id" />
-                        </group>
-                        <group>
-                            <field name="date" />
-                            <field name="payment_method" />
-                            <field name="amount" widget="monetary" />
-                        </group>
+                    <group name="group_1" string="Datos generales">
+                        <field name="date_time" string="Fecha de registro" />
+                        <field name="partner_id" string="Nombre dueño de mascota" />
+                        <field name="pet_ids" string="Nombre de mascota" />
+                        <field name="description" string="Observaciones" />
                     </group>
                 </sheet>
+                <notebook>
+                    <page string="Pagos">
+                        <field name="payment_ids"
+                            context="{
+                                'default_partner_id': partner_id,
+                                'default_payment_type': 'inbound',
+                                'default_partner_type': 'customer'
+                            }">
+                            <tree string="Pagos de la cita" editable="bottom">
+                                <field name="date" />
+                                <field name="name" string="Referencia" readonly="1" />
+                                <field name="suitable_journal_ids" column_invisible="True" />
+                                <field name="journal_id" string="Diario" />
+                                <field name="vet_payment_method_type" string="Método" />
+                                <field name="amount" sum="Total" />
+                                <field name="currency_id" column_invisible="True" />
+                                <field name="state" widget="badge"
+                                    decoration-success="state == 'posted'"
+                                    decoration-info="state == 'draft'" />
+                            </tree>
+                        </field>
+                    </page>
+                </notebook>
             </form>
-        </field>
-    </record>
-
-    <!-- Acción de ventana-->
-    <record id="action_vet_payment" model="ir.actions.act_window">
-        <field name="name">Pagos</field>
-        <field name="res_model">vet.payment</field>
-        <field name="view_mode">tree,form</field>
-        <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
-                Registra el primer pago aquí.
-            </p>
         </field>
     </record>
 </odoo>
@@ -183,13 +209,26 @@ from . import wizard
 __pycache__
 </file>
 
+<file path="models/vet_treatment.py">
+from odoo import models, fields
+
+class VetTreatment(models.Model):
+    _name = 'vet.treatment'
+    _description = 'Resultado médico de una cita'
+
+    # Muchos resultados medicos pertenecen a una cita "vet.appointment"
+    appointment_id = fields.Many2one('vet.appointment', string='Cita relacionada')
+    diagnosis = fields.Text(string='Diagnóstico médico')
+    medication_ids = fields.Many2many('vet.medication', string='Medicinas recetadas')
+</file>
+
 <file path="models/__init__.py">
-from . import inherit_res_partner
 from . import vet_patient
 from . import vet_appointment
 from . import vet_medication
 from . import vet_treatment
-from . import vet_payment
+from . import inherit_res_partner
+from . import inherit_account_payment
 </file>
 
 <file path="models/inherit_res_partner.py">
@@ -206,53 +245,6 @@ class InheritResPartner(models.Model):
         'vet.patient', 
         'partner_id',
         string="Mascotas")
-</file>
-
-<file path="models/vet_treatment.py">
-from odoo import models, fields
-
-class VetTreatment(models.Model):
-    _name = 'vet.treatment'
-    _description = 'Resultado médico de una cita'
-
-    # Muchos resultados medicos pertenecen a una cita "vet.appointment"
-    appointment_id = fields.Many2one('vet.appointment', string='Cita relacionada')
-    diagnosis = fields.Text(string='Diagnóstico médico')
-    medication_ids = fields.Many2many('vet.medication', string='Medicinas recetadas')
-</file>
-
-<file path="security/ir.model.access.csv">
-id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_vet_patient,vet.patient.access,model_vet_patient,base.group_user,1,1,1,1
-access_vet_appointment,vet.appointment.access,model_vet_appointment,base.group_user,1,1,1,1
-access_vet_medication,vet.medication.access,model_vet_medication,base.group_user,1,1,1,1
-access_vet_treatment,vet.treatment.access,model_vet_treatment,base.group_user,1,1,1,1
-access_vet_payment,vet.payment.access,model_vet_payment,base.group_user,1,1,1,1
-</file>
-
-<file path="models/vet_appointment.py">
-from odoo import models, fields
-
-class VetAppointment(models.Model):
-    _name = 'vet.appointment'
-    _description = 'Todo el evento de la cita'
-
-    code = fields.Char(string='Referencia')
-    date_time = fields.Datetime(string='Fecha y hora', default=fields.Datetime.now ,required=True)
-    partner_id = fields.Many2one('res.partner', string="Dueño", required=True)
-    pet_ids = fields.Many2one('vet.patient', string='Paciente', required=True)
-    doctor_id = fields.Many2one('res.partner', string='Doctor', domain=[('is_vet_doctor', '=', True)])
-    state = fields.Selection(
-        [
-            ('draft', 'Borrador'),
-            ('confirmed', 'Confirmado'),
-            ('done', 'Realizado'),
-            ('cancel', 'Cancelado')
-        ], default='draft'
-    )
-    description = fields.Text(string='Observaciones iniciales')
-
-    payment_ids = fields.One2many('vet.payment', 'appointment_id', string='Pagos realizados')
 </file>
 
 <file path="models/vet_medication.py">
@@ -283,111 +275,47 @@ class VetPatient(models.Model):
     history_ids = fields.One2many('vet.appointment', 'pet_ids', string='Historial de citas')
 </file>
 
-<file path="views/inherit_res_partner.xml">
-<?xml version="1.0" encoding="utf-8"?>
-<odoo>
-    <record id="res_partner_view_tree" model="ir.ui.view">
-        <field name="name">res.partner.view.tree</field>
-        <field name="model">res.partner</field>
-        <field name="mode">primary</field>
-        <field name="inherit_id" ref="base.view_partner_tree" />
-        <field name="arch" type="xml">
-            <xpath expr="//tree" position="inside">
-
-            </xpath>
-        </field>
-    </record>
-
-    <record id="res_partner_view_kanban" model="ir.ui.view">
-        <field name="name">res.partner.view.kanban</field>
-        <field name="model">res.partner</field>
-        <field name="mode">primary</field>
-        <field name="inherit_id" ref="base.res_partner_kanban_view" />
-        <field name="arch" type="xml">
-            <xpath expr="//kanban" position="inside">
-
-            </xpath>
-        </field>
-    </record>
-
-    <record id="res_partner_view_form" model="ir.ui.view">
-        <field name="name">res.partner.view.form</field>
-        <field name="model">res.partner</field>
-        <field name="mode">primary</field>
-        <field name="inherit_id" ref="base.view_partner_form" />
-        <field name="arch" type="xml">
-            <xpath expr="//field[@name='vat']" position="after">
-                <field name="pet_ids" string="Mascotas" />
-            </xpath>
-        </field>
-    </record>
-
-</odoo>
+<file path="security/ir.model.access.csv">
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_vet_patient,vet.patient.access,model_vet_patient,base.group_user,1,1,1,1
+access_vet_appointment,vet.appointment.access,model_vet_appointment,base.group_user,1,1,1,1
+access_vet_medication,vet.medication.access,model_vet_medication,base.group_user,1,1,1,1
+access_vet_treatment,vet.treatment.access,model_vet_treatment,base.group_user,1,1,1,1
 </file>
 
-<file path="views/vet_appointment.xml">
-<?xml version="1.0" encoding="utf-8"?>
-<odoo>
-    <record id="vet_appointment_view_tree" model="ir.ui.view">
-        <field name="name">vet.appointment.view.tree</field>
-        <field name="model">vet.appointment</field>
-        <field name="arch" type="xml">
-            <tree string="Lista de Citas">
-                <field name="code" string="Codigo de referencia" />
-                <field name="partner_id" string="Dueño de mascota" />
-                <field name="date_time" string="Fecha y hora" />
-                <field name="pet_ids" string="Nombre de la mascota" />
-                <field name="state" string="Estado de la cita" widget="badge"
-                    decoration-muted="state == 'draft'" decoration-info="state == 'confirmed'"
-                    decoration-success="state == 'done'" decoration-danger="state == 'cancel'" />
-            </tree>
-        </field>
-    </record>
+<file path="models/vet_appointment.py">
+from odoo import models, fields
 
-    <record id="vet_appointment_view_form" model="ir.ui.view">
-        <field name="name">vet.appointment.view.form</field>
-        <field name="model">vet.appointment</field>
-        <field name="arch" type="xml">
-            <form string="Registro de cita">
-                <header>
-                    <field name="state" widget="statusbar" />
-                </header>
-                <sheet>
-                    <group name="group_1" string="Datos generales">
-                        <field name="date_time" string="Fecha de registro" />
-                        <field name="partner_id" string="Nombre dueño de mascota" />
-                        <field name="pet_ids" string="Nombre de mascota" />
-                        <field name="description" string="Observaciones" />
-                    </group>
-                </sheet>
-                <!-- Ventana para mostrar pagos -->
-                <notebook>
-                    <page string="Pagos">
-                        <field name="payment_ids">
-                            <tree editable="bottom">
-                                <field name="date" />
-                                <field name="name" />
-                                <field name="payment_method" />
-                                <field name="amount" />
-                                <field name="state" widget="badge"
-                                    decoration-success="state == 'posted'" />
-                                <!-- Botón pequeño en la lista para confirmar rápido -->
-                                <button name="action_confirm" type="object" icon="fa-check"
-                                    title="Confirmar" invisible="state == 'posted'" />
-                            </tree>
-                        </field>
-                    </page>
-                </notebook>
-            </form>
-        </field>
-    </record>
-</odoo>
+class VetAppointment(models.Model):
+    _name = 'vet.appointment'
+    _description = 'Todo el evento de la cita'
+
+    code = fields.Char(string='Referencia')
+    date_time = fields.Datetime(string='Fecha y hora', default=fields.Datetime.now ,required=True)
+    partner_id = fields.Many2one('res.partner', string="Dueño", required=True)
+    pet_ids = fields.Many2one('vet.patient', string='Paciente', required=True)
+    doctor_id = fields.Many2one('res.partner', string='Doctor', domain=[('is_vet_doctor', '=', True)])
+    state = fields.Selection(
+        [
+            ('draft', 'Borrador'),
+            ('confirmed', 'Confirmado'),
+            ('done', 'Realizado'),
+            ('cancel', 'Cancelado')
+        ], default='draft'
+    )
+    description = fields.Text(string='Observaciones iniciales')
+
+    payment_ids = fields.One2many(
+        'account.payment',
+        'vet_appointment_id',
+        string='Pagos realizados'
+    )
 </file>
 
 <file path="__manifest__.py">
 {
     'name': 'Lummy Vet',
-    'version': '1.1',
+    'version': '17.0.1.0.0',
     'summary': 'Gestión de clínica veterinaria',
     'description': """Un sistema para Lummy-Vet que permite administrar sus pacientes (mascotas),
                     sus dueños (clientes), las citas médicas y el historial clínico""",
@@ -396,15 +324,16 @@ class VetPatient(models.Model):
 
     'depends': [
         'base',
-        'contacts'
+        'contacts',
+        'account',
     ],
 
     'data': [
         'security/ir.model.access.csv',
 
-        'views/vet_appointment.xml',
-        'views/inherit_res_partner.xml',
-        'views/vet_payment_views.xml',
+        'views/vet_appointment_views.xml',
+        'views/inherit_res_partner_views.xml',
+        
         'views/menus.xml'
     ],
 
@@ -417,23 +346,94 @@ class VetPatient(models.Model):
 </file>
 
 <file path="README.md">
-# Lummy Veterinaria
+<!-- INICIO DE LA DOCUMENTACIÓN DEL PROYECTO -->
+<br />
+<div align="center">
+  <a href="https://github.com/tu-usuario/lummy-vet">
+    <!-- Ajusta la ruta de la imagen si es necesario -->
+    <img src="static/description/icon.png" alt="Logo Lummy Vet" width="150" height="150">
+  </a>
 
-Un sistema para **Lummy-Vet** que permite administrar sus pacientes (mascotas), sus dueños (clientes),
-las citas médicas y el historial clínico
+  <h3 align="center">Lummy Vet (VetOdoo)</h3>
 
-## Tecnologías
+  <p align="center">
+    Sistema de gestión integral para clínicas veterinarias: Pacientes, Citas, Tratamientos y Pagos.
+    <br />
+    <br />
+    <a href="https://github.com/tu-usuario/lummy-vet"><strong>Explora la documentación »</strong></a>
+    <br />
+    <br />
+    <a href="#">Ver Demostración</a>
+  </p>
+</div>
 
-*   ![Odoo](https://img.shields.io/badge/Odoo-714B67?style=for-the-badge&logo=odoo&logoColor=white)
-*   ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
-*   ![Python](https://img.shields.io/badge/XML-orange?style=for-the-badge&logo=XML&logoColor=white)
-             
-Software Developer: **Alessandro Marquina**
+<!-- ACERCA DEL PROYECTO -->
+## 🐾 Acerca del Proyecto
+
+<br>
+
+**Lummy Vet** es un módulo personalizado para **Odoo 17** diseñado para centralizar la administración de una clínica veterinaria. Este proyecto nace para solucionar la pérdida de trazabilidad en historiales médicos y la gestión manual de citas.
+
+El sistema permite optimizar el flujo de trabajo desde la admisión hasta el cobro, garantizando que los dueños y sus mascotas tengan un expediente claro, y que los doctores cuenten con herramientas rápidas para diagnósticos y recetas.
+
+### Tecnologías
+<div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;">
+
+  [![Odoo](https://img.shields.io/badge/Odoo-714B67?style=for-the-badge&logo=odoo&logoColor=white)](https://www.odoo.com/)
+  [![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+  [![XML](https://img.shields.io/badge/XML-orange?style=for-the-badge&logo=xml&logoColor=white)](https://www.w3.org/XML/)
+  [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+  [![Git](https://img.shields.io/badge/git-%23F05033.svg?style=for-the-badge&logo=git&logoColor=white)](https://git-scm.com/)
+
+</div>
+
+<!-- ARQUITECTURA -->
+## 🏗 Arquitectura del Sistema
+
+Este proyecto implementa una **Arquitectura Modular por Features (Screaming Architecture)** para mejorar la mantenibilidad y el orden del código.
+
+```text
+lummy_vet/
+├── features/
+│   ├── appointments/  (Gestión de Citas y Agenda)
+│   ├── contacts/      (Extensiones para Dueños y Doctores)
+│   ├── medications/   (Catálogo de Medicamentos)
+│   ├── patients/      (Expedientes de Mascotas)
+│   ├── payments/      (Métodos de Pago)
+│   └── treatments/    (Historial Médico y Diagnósticos)
+├── views/             (Menús Principales)
+└── static/            (Recursos Web)
+```
+
+<!-- MIEMBROS DEL EQUIPO -->
+## 👥 Miembros del Equipo
+
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/tu-usuario-alessandro">
+        <img src="https://ui-avatars.com/api/?name=Alessandro+Marquina&background=0D8ABC&color=fff&size=128" width="100px" style="border-radius:50%"/>
+        <br />
+        <sub><b>Alessandro Marquina</b></sub>
+      </a>
+      <br />
+      Software Developer
+    </td>
+    <td align="center">
+      <a href="https://github.com/tu-usuario-geraldo">
+        <img src="https://ui-avatars.com/api/?name=Geraldo+Jaramillo&background=0D8ABC&color=fff&size=128" width="100px" style="border-radius:50%"/>
+        <br />
+        <sub><b>Geraldo Jaramillo</b></sub>
+      </a>
+      <br />
+      Software Developer
+    </td>
+  </tr>
+</table>
 </file>
 
 <file path="views/menus.xml">
 <?xml version="1.0" encoding="utf-8"?>
-
 <odoo>
     <record id="action_view_vet_appointment" model="ir.actions.act_window">
         <field name="name">Registrar cita</field>
@@ -449,6 +449,15 @@ Software Developer: **Alessandro Marquina**
             (0, 0, {'view_mode': 'tree', 'view_id': ref('res_partner_view_tree')}),
             (0, 0, {'view_mode': 'kanban', 'view_id': ref('res_partner_view_kanban')}),
             (0, 0, {'view_mode': 'form', 'view_id': ref('res_partner_view_form')})]" />
+    </record>
+
+    <record id="action_account_payments_vet" model="ir.actions.act_window">
+        <field name="name">Pagos</field>
+        <field name="res_model">account.payment</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('partner_type', '=', 'customer')]</field>
+        <field name="context">{'default_partner_type': 'customer', 'default_payment_type':
+            'inbound'}</field>
     </record>
 
     <menuitem
@@ -467,9 +476,8 @@ Software Developer: **Alessandro Marquina**
         id="menu_vet_payment"
         name="Pagos"
         parent="lummy_vet_menu_root"
-        action="action_vet_payment"
+        action="action_account_payments_vet"
         sequence="30" />
-
 </odoo>
 </file>
 
