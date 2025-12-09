@@ -46,15 +46,21 @@ Este proyecto implementa una **Arquitectura Modular por Features (Screaming Arch
 
 ```text
 lummy_vet/
-├── features/
-│   ├── appointments/  (Gestión de Citas y Agenda)
-│   ├── contacts/      (Extensiones para Dueños y Doctores)
-│   ├── medications/   (Catálogo de Medicamentos)
-│   ├── patients/      (Expedientes de Mascotas)
-│   ├── payments/      (Métodos de Pago)
-│   └── treatments/    (Historial Médico y Diagnósticos)
-├── views/             (Menús Principales)
-└── static/            (Recursos Web)
+├── models/             # Lógica de negocio y definición de datos (ORM)
+│   ├── inherit_res_partner.py  # Extensión de contactos (Dueños/Doctores)
+│   ├── vet_appointment.py      # Lógica de Citas
+│   ├── vet_patient.py          # Lógica de Mascotas
+│   ├── vet_payment.py          # Lógica de Pagos
+│   └── ...
+├── views/              # Interfaz de usuario (XML)
+│   ├── menus.xml               # Estructura de navegación
+│   ├── vet_appointment.xml     # Vistas de Citas
+│   ├── vet_payment_views.xml   # Vistas de Pagos
+│   └── ...
+├── security/           # Reglas de acceso (ACLs)
+├── static/             # Recursos estáticos (Imágenes, CSS)
+├── wizard/             # Asistentes (Wizards)
+└── __manifest__.py     # Metadatos del módulo
 ```
 
 <!-- MIEMBROS DEL EQUIPO -->
