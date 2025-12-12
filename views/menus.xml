@@ -1,21 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+
+    <!-- Acción Citas -->
     <record id="action_view_vet_appointment" model="ir.actions.act_window">
-        <field name="name">Registrar cita</field>
+        <field name="name">Citas</field>
         <field name="res_model">vet.appointment</field>
+        <field name="view_mode">kanban,calendar,tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                ¡Agenda tu primera cita!
+            </p>
+        </field>
     </record>
 
-    <record id="action_view_res_partner" model="ir.actions.act_window">
-        <field name="name">Clientes</field>
-        <field name="res_model">res.partner</field>
-        <field name="view_mode">kanban,tree,form</field>
-        <field name="view_ids"
-            eval="[(5, 0, 0),
-            (0, 0, {'view_mode': 'tree', 'view_id': ref('res_partner_view_tree')}),
-            (0, 0, {'view_mode': 'kanban', 'view_id': ref('res_partner_view_kanban')}),
-            (0, 0, {'view_mode': 'form', 'view_id': ref('res_partner_view_form')})]" />
-    </record>
-
+    <!-- Acción Pagos (Solo ingresos de clientes) -->
     <record id="action_account_payments_vet" model="ir.actions.act_window">
         <field name="name">Pagos</field>
         <field name="res_model">account.payment</field>
@@ -25,22 +23,80 @@
             'inbound'}</field>
     </record>
 
+    <!-- Acción Dueños (Clientes) -->
+    <record id="action_view_res_partner_owners" model="ir.actions.act_window">
+        <field name="name">Dueños</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">kanban,tree,form</field>
+    </record>
+
+    <!-- Acción Doctores (Configuración) -->
+    <record id="action_view_res_partner_doctors" model="ir.actions.act_window">
+        <field name="name">Doctores</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="domain">[('is_vet_doctor', '=', True)]</field>
+        <field name="context">{'default_is_vet_doctor': True}</field>
+    </record>
+
+    <!-- MENÚ RAÍZ (Nivel 0) -->
     <menuitem
         id="lummy_vet_menu_root"
         name="Lummy Vet"
-        action="action_view_vet_appointment"
-        web_icon="lummy_vet/static/description/icon.png" />
+        web_icon="lummy_vet,static/description/icon.png"
+        sequence="10" />
 
+    <!-- 1. RECEPCIÓN (Nivel 1) -->
     <menuitem
-        id="menu_res_partner"
-        name="Clientes"
+        id="menu_group_reception"
+        name="Recepción"
         parent="lummy_vet_menu_root"
-        action="action_view_res_partner" />
+        sequence="10" />
 
+    <!-- Nivel 2 -->
+    <menuitem id="menu_reception_appointments" name="Citas" parent="menu_group_reception"
+        action="action_view_vet_appointment" sequence="10" />
+    <menuitem id="menu_reception_payments" name="Pagos" parent="menu_group_reception"
+        action="action_account_payments_vet" sequence="20" />
+
+
+    <!-- 2. PACIENTES Y DUEÑOS (Nivel 1) -->
     <menuitem
-        id="menu_vet_payment"
-        name="Pagos"
+        id="menu_group_patients_owners"
+        name="Pacientes y Dueños"
         parent="lummy_vet_menu_root"
-        action="action_account_payments_vet"
+        sequence="20" />
+
+    <!-- Nivel 2 -->
+    <menuitem id="menu_patients_pet" name="Mascotas" parent="menu_group_patients_owners"
+        action="action_view_vet_patient" sequence="10" />
+    <menuitem id="menu_patients_owner" name="Dueños" parent="menu_group_patients_owners"
+        action="action_view_res_partner_owners" sequence="20" />
+
+
+    <!-- 3. CONSULTORIO MÉDICO (Nivel 1) -->
+    <menuitem
+        id="menu_group_medical"
+        name="Consultorio Médico"
+        parent="lummy_vet_menu_root"
         sequence="30" />
+
+    <!-- Nivel 2 -->
+    <menuitem id="menu_medical_history" name="Tratamientos" parent="menu_group_medical"
+        action="action_view_vet_treatment" sequence="20" />
+
+
+    <!-- 4. CONFIGURACIÓN (Nivel 1) -->
+    <menuitem
+        id="menu_group_config"
+        name="Configuración"
+        parent="lummy_vet_menu_root"
+        sequence="40" />
+
+    <!-- Nivel 2 -->
+    <menuitem id="menu_config_medication" name="Medicamentos" parent="menu_group_config"
+        action="action_view_vet_medication" sequence="10" />
+    <menuitem id="menu_config_doctors" name="Doctores" parent="menu_group_config"
+        action="action_view_res_partner_doctors" sequence="20" />
+
 </odoo>

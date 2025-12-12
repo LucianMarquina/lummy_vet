@@ -16,9 +16,13 @@
     'data': [
         'security/ir.model.access.csv',
 
+        'views/vet_patient_views.xml',
+        'views/vet_treatment_views.xml',
+        'views/vet_medication_views.xml',
         'views/vet_appointment_views.xml',
         'views/inherit_res_partner_views.xml',
-        
+        'views/inherit_account_payment_views.xml',
+
         'views/menus.xml'
     ],
 

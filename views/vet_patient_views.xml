@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista Tree (Lista) -->
+    <record id="view_vet_patient_tree" model="ir.ui.view">
+        <field name="name">vet.patient.tree</field>
+        <field name="model">vet.patient</field>
+        <field name="arch" type="xml">
+            <tree string="Mascotas">
+                <field name="name" />
+                <field name="pet_breed" />
+                <field name="age_pet" />
+                <field name="partner_id" />
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vista Form (Formulario) -->
+    <record id="view_vet_patient_form" model="ir.ui.view">
+        <field name="name">vet.patient.form</field>
+        <field name="model">vet.patient</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <field name="image_patient" widget="image" class="oe_avatar" />
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" />
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="partner_id" />
+                            <field name="pet_breed" />
+                        </group>
+                        <group>
+                            <field name="birth_date" />
+                            <field name="age_pet" />
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Historial Clínico">
+                            <field name="history_ids" readonly="1" />
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Acción de Ventana -->
+    <record id="action_view_vet_patient" model="ir.actions.act_window">
+        <field name="name">Mascotas</field>
+        <field name="res_model">vet.patient</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>
