@@ -42,8 +42,6 @@ El sistema permite optimizar el flujo de trabajo desde la admisión hasta el cob
 <!-- ARQUITECTURA -->
 ## 🏗 Arquitectura del Sistema
 
-Este proyecto implementa una **Arquitectura Modular por Features (Screaming Architecture)** para mejorar la mantenibilidad y el orden del código.
-
 ```text
 lummy_vet/
 ├── models/             # Lógica de negocio y definición de datos (ORM)
